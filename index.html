@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saree Inventory Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .add-form {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 2px solid #e9ecef;
+        }
+
+        .add-form h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 2fr auto;
+            gap: 15px;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .inventory-table {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .table-header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 12px;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .saree-image {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .saree-image:hover {
+            transform: scale(1.1);
+        }
+
+        .edit-input {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .edit-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+            min-width: auto;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .drag-handle {
+            cursor: grab;
+            color: #666;
+            font-size: 18px;
+            margin-right: 10px;
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .dragging {
+            opacity: 0.5;
+            background: #f0f0f0;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            max-width: 90vw;
+            max-height: 90vh;
+        }
+
+        .modal img {
+            max-width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+            border-radius: 10px;
+        }
+
+        .close {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            
+            .form-row .btn {
+                grid-column: span 2;
+            }
+            
+            th, td {
+                padding: 10px 8px;
+                font-size: 14px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🥻 Saree Inventory Management</h1>
+            <p>Manage your beautiful saree collection with ease</p>
+        </div>
+        
+        <div class="main-content">
+            <div id="messageContainer"></div>
+            
+            <div class="add-form">
+                <h2>Add New Saree</h2>
+                <form id="addSareeForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="price">Price (LKR)</label>
+                            <input type="number" id="price" name="price" step="0.01" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="material">Material</label>
+                            <input type="text" id="material" name="material" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="imageUrl">Image URL</label>
+                            <input type="url" id="imageUrl" name="imageUrl" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Saree</button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="inventory-table">
+                <div class="table-header">
+                    <h2>Current Inventory</h2>
+                    <button id="refreshBtn" class="btn btn-secondary">Refresh</button>
+                </div>
+                <div class="table-container">
+                    <div id="loadingIndicator" class="loading">Loading sarees...</div>
+                    <table id="sareeTable" style="display: none;">
+                        <thead>
+                            <tr>
+                                <th>Order</th>
+                                <th>ID</th>
+                                <th>Price (LKR)</th>
+                                <th>Material</th>
+                                <th>Image URL</th>
+                                <th>Preview</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sareeTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for image preview -->
+    <div id="imageModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <img id="modalImage" src="" alt="Saree Preview">
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbxRFVZCigukhc8oRhxz9fpKr61MkLxraGX9wfQLLY19zKKnAZG3GRIIioRNCoWvgUL6/exec";
+        
+        let sarees = [];
+        let editingRow = null;
+
+        // DOM elements
+        const addForm = document.getElementById('addSareeForm');
+        const sareeTableBody = document.getElementById('sareeTableBody');
+        const sareeTable = document.getElementById('sareeTable');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const messageContainer = document.getElementById('messageContainer');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const imageModal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        const closeModal = document.querySelector('.close');
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSarees();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            addForm.addEventListener('submit', handleAddSaree);
+            refreshBtn.addEventListener('click', loadSarees);
+            closeModal.addEventListener('click', () => imageModal.style.display = 'none');
+            imageModal.addEventListener('click', (e) => {
+                if (e.target === imageModal) imageModal.style.display = 'none';
+            });
+        }
+
+        // API Functions
+        async function loadSarees() {
+            try {
+                showLoading(true);
+                const response = await fetch(API_URL, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                sarees = data || [];
+                renderSarees();
+                showMessage('Sarees loaded successfully!', 'success');
+            } catch (error) {
+                console.error('Error loading sarees:', error);
+                showMessage('Error loading sarees: ' + error.message, 'error');
+                renderSarees(); // Render empty state
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function addSaree(sareeData) {
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'add',
+                        ...sareeData
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                showMessage('Saree added successfully!', 'success');
+                loadSarees();
+                addForm.reset();
+            } catch (error) {
+                console.error('Error adding saree:', error);
+                showMessage('Error adding saree: ' + error.message, 'error');
+            }
+        }
+
+        async function updateSaree(id, sareeData) {
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'edit',
+                        id: id,
+                        ...sareeData
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                showMessage('Saree updated successfully!', 'success');
+                loadSarees();
+            } catch (error) {
+                console.error('Error updating saree:', error);
+                showMessage('Error updating saree: ' + error.message, 'error');
+            }
+        }
+
+        async function deleteSaree(id) {
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'delete',
+                        id: id
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                showMessage('Saree deleted successfully!', 'success');
+                loadSarees();
+            } catch (error) {
+                console.error('Error deleting saree:', error);
+                showMessage('Error deleting saree: ' + error.message, 'error');
+            }
+        }
+
+        async function reorderSarees(newOrder) {
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'reorder',
+                        newOrder: newOrder
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                showMessage('Sarees reordered successfully!', 'success');
+                loadSarees();
+            } catch (error) {
+                console.error('Error reordering sarees:', error);
+                showMessage('Error reordering sarees: ' + error.message, 'error');
+            }
+        }
+
+        // UI Functions
+        function renderSarees() {
+            if (!sarees || sarees.length === 0) {
+                sareeTableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: #666;">No sarees found. Add some sarees to get started!</td></tr>';
+                return;
+            }
+
+            sareeTableBody.innerHTML = sarees.map((saree, index) => `
+                <tr data-id="${saree.id}" draggable="true">
+                    <td>
+                        <span class="drag-handle">⋮⋮</span>
+                        ${index + 1}
+                    </td>
+                    <td>${saree.id}</td>
+                    <td class="editable-price">${parseFloat(saree.price).toLocaleString('en-LK', { style: 'currency', currency: 'LKR' })}</td>
+                    <td class="editable-material">${saree.material}</td>
+                    <td class="editable-image-url" style="max-width: 200px; word-break: break-all;">${saree.image_url}</td>
+                    <td>
+                        <img src="${saree.image_url}" alt="Saree" class="saree-image" 
+                             onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yNSAyNUMyNyAyMyAzMyAyMyAzNSAyNUMzNyAyNyAzNyAzMyAzNSAzNUMzMyAzNyAyNyAzNyAyNSAzNUMyMyAzMyAyMyAyNyAyNSAyNVoiIGZpbGw9IiNEMUQ1REIiLz4KPC9zdmc+Cg=='"
+                             onclick="showImageModal('${saree.image_url}')">
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-success btn-small" onclick="editRow(${saree.id})">Edit</button>
+                            <button class="btn btn-danger btn-small" onclick="confirmDelete(${saree.id})">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            setupDragAndDrop();
+        }
+
+        function setupDragAndDrop() {
+            const rows = sareeTableBody.querySelectorAll('tr');
+            
+            rows.forEach(row => {
+                row.addEventListener('dragstart', handleDragStart);
+                row.addEventListener('dragover', handleDragOver);
+                row.addEventListener('drop', handleDrop);
+                row.addEventListener('dragend', handleDragEnd);
+            });
+        }
+
+        let draggedRow = null;
+
+        function handleDragStart(e) {
+            draggedRow = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.outerHTML);
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            if (this !== draggedRow) {
+                const draggedIndex = Array.from(sareeTableBody.children).indexOf(draggedRow);
+                const targetIndex = Array.from(sareeTableBody.children).indexOf(this);
+                
+                if (draggedIndex < targetIndex) {
+                    this.parentNode.insertBefore(draggedRow, this.nextSibling);
+                } else {
+                    this.parentNode.insertBefore(draggedRow, this);
+                }
+                
+                updateOrderFromDOM();
+            }
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            draggedRow = null;
+        }
+
+        function updateOrderFromDOM() {
+            const rows = Array.from(sareeTableBody.children);
+            const newOrder = rows.map(row => parseInt(row.dataset.id));
+            reorderSarees(newOrder);
+        }
+
+        function editRow(id) {
+            if (editingRow) {
+                cancelEdit();
+            }
+            
+            const row = document.querySelector(`tr[data-id="${id}"]`);
+            const saree = sarees.find(s => s.id === id);
+            
+            if (!row || !saree) return;
+            
+            editingRow = { id, row, originalData: { ...saree } };
+            
+            // Replace cells with input fields
+            const priceCell = row.querySelector('.editable-price');
+            const materialCell = row.querySelector('.editable-material');
+            const imageUrlCell = row.querySelector('.editable-image-url');
+            const actionsCell = row.querySelector('.action-buttons');
+            
+            priceCell.innerHTML = `<input type="number" class="edit-input" value="${saree.price}" step="0.01" min="0" id="edit-price-${id}">`;
+            materialCell.innerHTML = `<input type="text" class="edit-input" value="${saree.material}" id="edit-material-${id}">`;
+            imageUrlCell.innerHTML = `<input type="url" class="edit-input" value="${saree.image_url}" id="edit-url-${id}">`;
+            
+            actionsCell.innerHTML = `
+                <button class="btn btn-success btn-small" onclick="saveEdit(${id})">Save</button>
+                <button class="btn btn-secondary btn-small" onclick="cancelEdit()">Cancel</button>
+            `;
+        }
+
+        function saveEdit(id) {
+            const priceInput = document.getElementById(`edit-price-${id}`);
+            const materialInput = document.getElementById(`edit-material-${id}`);
+            const urlInput = document.getElementById(`edit-url-${id}`);
+            
+            if (!priceInput || !materialInput || !urlInput) return;
+            
+            const price = parseFloat(priceInput.value);
+            const material = materialInput.value.trim();
+            const imageUrl = urlInput.value.trim();
+            
+            // Validation
+            if (isNaN(price) || price < 0) {
+                showMessage('Please enter a valid price', 'error');
+                return;
+            }
+            
+            if (!material) {
+                showMessage('Please enter a material', 'error');
+                return;
+            }
+            
+            if (!imageUrl || !isValidUrl(imageUrl)) {
+                showMessage('Please enter a valid image URL', 'error');
+                return;
+            }
+            
+            const updatedData = {
+                price: price,
+                material: material,
+                image_url: imageUrl
+            };
+            
+            updateSaree(id, updatedData);
+            editingRow = null;
+        }
+
+        function cancelEdit() {
+            if (!editingRow) return;
+            
+            const { id, row, originalData } = editingRow;
+            
+            // Restore original content
+            const priceCell = row.querySelector('.editable-price');
+            const materialCell = row.querySelector('.editable-material');
+            const imageUrlCell = row.querySelector('.editable-image-url');
+            const actionsCell = row.querySelector('.action-buttons');
+            
+            priceCell.innerHTML = parseFloat(originalData.price).toLocaleString('en-LK', { style: 'currency', currency: 'LKR' });
+            materialCell.innerHTML = originalData.material;
+            imageUrlCell.innerHTML = originalData.image_url;
+            actionsCell.innerHTML = `
+                <button class="btn btn-success btn-small" onclick="editRow(${id})">Edit</button>
+                <button class="btn btn-danger btn-small" onclick="confirmDelete(${id})">Delete</button>
+            `;
+            
+            editingRow = null;
+        }
+
+        function confirmDelete(id) {
+            if (confirm('Are you sure you want to delete this saree? This action cannot be undone.')) {
+                deleteSaree(id);
+            }
+        }
+
+        function showImageModal(imageUrl) {
+            modalImage.src = imageUrl;
+            imageModal.style.display = 'block';
+        }
+
+        function handleAddSaree(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(addForm);
+            const price = parseFloat(formData.get('price'));
+            const material = formData.get('material').trim();
+            const imageUrl = formData.get('imageUrl').trim();
+            
+            // Validation
+            if (isNaN(price) || price < 0) {
+                showMessage('Please enter a valid price', 'error');
+                return;
+            }
+            
+            if (!material) {
+                showMessage('Please enter a material', 'error');
+                return;
+            }
+            
+            if (!imageUrl || !isValidUrl(imageUrl)) {
+                showMessage('Please enter a valid image URL', 'error');
+                return;
+            }
+            
+            const sareeData = {
+                price: price,
+                material: material,
+                image_url: imageUrl
+            };
+            
+            addSaree(sareeData);
+        }
+
+        function isValidUrl(string) {
+            try {
+                new URL(string);
+                return true;
+            } catch (_) {
+                return false;
+            }
+        }
+
+        function showMessage(message, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = message;
+            
+            messageContainer.innerHTML = '';
+            messageContainer.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 5000);
+        }
+
+        function showLoading(show) {
+            if (show) {
+                loadingIndicator.style.display = 'block';
+                sareeTable.style.display = 'none';
+            } else {
+                loadingIndicator.style.display = 'none';
+                sareeTable.style.display = 'table';
+            }
+        }
+    </script>
+</body>
+</html>
