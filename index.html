@@ -418,7 +418,7 @@
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbxRFVZCigukhc8oRhxz9fpKr61MkLxraGX9wfQLLY19zKKnAZG3GRIIioRNCoWvgUL6/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbwl-cteZtOKdVk040MXqZirc_RU8Q-8uFkWdQbxKlAH8vTt-Wdqju29uXD68Ca7cmeA/exec";
         
         let sarees = [];
         let editingRow = null;
@@ -453,11 +453,12 @@
         async function loadSarees() {
             try {
                 showLoading(true);
-                const response = await fetch(API_URL, {
+                
+                // First try with a simple GET request
+                const response = await fetch(API_URL + '?timestamp=' + Date.now(), {
                     method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
+                    mode: 'cors',
+                    cache: 'no-cache'
                 });
                 
                 if (!response.ok) {
@@ -465,12 +466,34 @@
                 }
                 
                 const data = await response.json();
-                sarees = data || [];
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                sarees = Array.isArray(data) ? data : [];
                 renderSarees();
-                showMessage('Sarees loaded successfully!', 'success');
+                
+                if (sarees.length > 0) {
+                    showMessage('Sarees loaded successfully!', 'success');
+                } else {
+                    showMessage('No sarees found. Add some sarees to get started!', 'success');
+                }
             } catch (error) {
                 console.error('Error loading sarees:', error);
-                showMessage('Error loading sarees: ' + error.message, 'error');
+                
+                if (error.message.includes('CORS') || error.message.includes('Failed to fetch')) {
+                    showMessage('CORS Error: Please update your Google Apps Script with CORS headers. Check the console for instructions.', 'error');
+                    console.log('CORS Fix Instructions:');
+                    console.log('1. Open your Google Apps Script');
+                    console.log('2. Replace your code with the updated version that includes CORS headers');
+                    console.log('3. Redeploy as a new version');
+                    console.log('4. Make sure Execute as: Me and Access: Anyone, even anonymous');
+                } else {
+                    showMessage('Error loading sarees: ' + error.message, 'error');
+                }
+                
+                sarees = [];
                 renderSarees(); // Render empty state
             } finally {
                 showLoading(false);
@@ -481,6 +504,8 @@
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
+                    mode: 'cors',
+                    cache: 'no-cache',
                     headers: {
                         'Content-Type': 'application/json',
                     },
@@ -504,7 +529,11 @@
                 addForm.reset();
             } catch (error) {
                 console.error('Error adding saree:', error);
-                showMessage('Error adding saree: ' + error.message, 'error');
+                if (error.message.includes('CORS') || error.message.includes('Failed to fetch')) {
+                    showMessage('CORS Error: Please update your Google Apps Script with CORS headers.', 'error');
+                } else {
+                    showMessage('Error adding saree: ' + error.message, 'error');
+                }
             }
         }
 
